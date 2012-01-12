@@ -2,7 +2,7 @@
   <h3>Testing smarty-lint</h3>
 {/if}
 
-{foreach from=$foo item=bar}
+{foreach $foo as $bar}
   {$bar|print_r}<br />
   {continue}
 {/foreach}

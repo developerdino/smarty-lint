@@ -1,5 +1,5 @@
-#!/usr/bin/php -q
-<?
+#!/usr/bin/php
+<?php
 /**
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -54,113 +54,102 @@ $show_all_errors = (empty($show_all_errors) || $show_all_errors == 'n') ? false 
 require_once dirname(__FILE__) . '/smarty/Smarty.class.php';
 
 class smarty_lint extends Smarty {
-  static public $lint_errors = array();
-  static public $lint_file = '';
-  static public $lint_result = '';
-  static public $show_all_errors;
+    static public $lint_errors = array();
+    static public $lint_file = '';
+    static public $lint_result = '';
+    static public $show_all_errors;
 
-  /**
-   * Attempt to compile the file we want to run a lint check on.
-   *
-   * @param string $template
-   */
-  public function fetch($template) {
-    self::$lint_file = $template;
-    parent::fetch($template, null, null, false);
-    $this->remove_compiled_template($template);
-  }
+    public function __construct() {
+        parent::__construct();
 
-  /**
-   * Remove the template that was just compiled, no need to let it sitting
-   * around collecting template-dust.
-   *
-   * @param string $template
-   */
-  private function remove_compiled_template($template) {
-    foreach (glob($this->compile_dir . '/*' . basename($template) . '*') as $c) {
-      if (file_exists($c)) {
-        unlink($c);
-      }
+        /* Turn Smarty template caching off */
+        $this->caching = self::CACHING_OFF;
     }
-  }
 
-  /**
-   * Custom error handler so we can parse out errors triggered deep inside
-   * the Smarty compiling classes.
-   *
-   * @param const $errno
-   * @param string $errstr
-   * @param string $errfile
-   * @param int $errline
-   * @return bool
-   */
-  static public function check_errors($errno, $errstr, $errfile, $errline) {
-    switch ($errno) {
-      case E_USER_ERROR:
-      default:
-        if (!self::$show_all_errors) {
-          if ($errno !== E_USER_ERROR) {
-            return;
-          }
+    /**
+     * Attempt to compile the file we want to run a lint check on.
+     *
+     * @param string $template
+     */
+    public function fetch($template) {
+        try {
+            self::$lint_file = $template;
+            parent::fetch($template, null, null, false);
+            $this->remove_compiled_template($template);
+        } catch (SmartyCompilerException $e) {
+            self::$lint_errors[] = array(
+                'errno' => $e->getCode(),
+                'errstr' => $e->getMessage(),
+                'errfile' => $e->getFile(),
+                'errline' => $e->getLine()
+            );
         }
-
-        self::$lint_errors[] = array(
-          'errno' => $errno,
-          'errstr' => $errstr,
-          'errfile' => $errfile,
-          'errline' => $errline
-        );
-      break;
     }
-  }
 
-  /**
-   * Shutdown smarty-lint and display errors (if any). If no errors, alert
-   * the user to a successful template compile.
-   *
-   */
-  static public function shutdown() {
-    ob_end_clean();
-
-    if (!empty(self::$lint_file)) {
-      if (count(self::$lint_errors) > 0) {
-        foreach (self::$lint_errors as $err) {
-          self::$lint_result .= $err['errstr'] . "\n";
+    /**
+     * Remove the template that was just compiled, no need to let it sitting
+     * around collecting template-dust.
+     *
+     * @param string $template
+     */
+    private function remove_compiled_template($template) {
+        foreach (glob($this->compile_dir . '/*' . basename($template) . '*') as $c) {
+            if (file_exists($c)) {
+                unlink($c);
+            }
         }
-      } else {
-        self::$lint_result = 'No errors present in ' . self::$lint_file . "\n";
-      }
-
-      echo self::$lint_result;
     }
-  }
 
-  /**
-   * Determine if there are any extensions to load into Smarty, and if there
-   * are then load them.
-   *
-   */
-  static public function load_extensions() {
-    global $smarty_lint;
+    /**
+     * Custom error handler so we can parse out errors triggered deep inside
+     * the Smarty compiling classes.
+     *
+     * @param const $errno
+     * @param string $errstr
+     * @param string $errfile
+     * @param int $errline
+     * @return bool
+     */
+    static public function check_errors($errno, $errstr, $errfile, $errline) {
+        switch ($errno) {
+            case 'E_USER_ERROR':
+            default:
+                if (!self::$show_all_errors) {
+                    if ($errno !== E_USER_ERROR) {
+                        return true;
+                    }
+                }
 
-    foreach (glob('extensions/*.php') as $extension) {
-      require_once $extension;
-
-      $extension = str_replace('.php', '', basename($extension));
-      $ext_methods = get_class_methods($extension);
-      foreach ($ext_methods as $method) {
-        if (preg_match('/^func_(\w+)$/', $method, $m)) {
-          $smarty_lint->register_function($m[1], array($extension, $method));
-        } else if (preg_match('/^modifier_(\w+)$/', $method, $m)) {
-          $smarty_lint->register_modifier($m[1], array($extension, $method));
-        } else if (preg_match('/^block_(\w+)$/', $method, $m)) {
-          $smarty_lint->register_block($m[1], array($extension, $method));
-        } else if (preg_match('/^prefilter_(\w+)$/', $method, $m)) {
-          $smarty_lint->register_prefilter(array($extension, $method));
+                self::$lint_errors[] = array(
+                    'errno' => $errno,
+                    'errstr' => $errstr,
+                    'errfile' => $errfile,
+                    'errline' => $errline
+                );
+                break;
         }
-      }
     }
-  }
+
+    /**
+     * Shutdown smarty-lint and display errors (if any). If no errors, alert
+     * the user to a successful template compile.
+     *
+     */
+    static public function shutdown() {
+        ob_end_clean();
+
+        if (!empty(self::$lint_file)) {
+            if (count(self::$lint_errors) > 0) {
+                foreach (self::$lint_errors as $err) {
+                    self::$lint_result .= $err['errstr'] . "\n";
+                }
+            } else {
+                self::$lint_result = 'No errors present in ' . self::$lint_file . "\n";
+            }
+
+            echo self::$lint_result;
+        }
+    }
 }
 
 ob_start();
@@ -169,11 +158,9 @@ set_error_handler(array('smarty_lint', 'check_errors'));
 register_shutdown_function(array('smarty_lint', 'shutdown'));
 
 $smarty_lint = new smarty_lint;
-$smarty_lint->caching = 0;
-$smarty_lint->template_dir = dirname($template);
-$smarty_lint->compile_dir = dirname(__FILE__) . '/smarty/templates_c';
+$smarty_lint->setTemplateDir(dirname($template));
+$smarty_lint->setCompileDir(dirname(__FILE__) . '/smarty/templates_c');
 
 smarty_lint::$show_all_errors = $show_all_errors;
-smarty_lint::load_extensions();
 
 $smarty_lint->fetch($template);
