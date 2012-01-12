@@ -16,9 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * @package smarty-lint
- * @link http://github.com/jonursenbach/smarty-lint/
+ * @link http://github.com/mofodojodino/smarty-lint/
  * @author Jon Ursenbach <jon@ursenba.ch>
- * @version 2.0.1
+ * @author Dean Tedesco <dino@tedesco.net.au>
+ * @version 3.0.0
  */
 
 error_reporting(E_ALL);
