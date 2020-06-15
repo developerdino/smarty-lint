@@ -10,16 +10,7 @@ before committing anything into your source tree you can run template lint
 checks alongside your normal code lints.
 
 ## How to install
-In the composer.json in your project, add this section:
-```json
-{
-    "repositories": [
-        {
-            "type": "vcs",
-            "url":  "git@github.com:developerdino/smarty-lint.git"
-        }
-    ]
-}
+Install via composer:
 ```
-
-Run: `composer require developerdino/smarty-lint`
+composer require developerdino/smarty-lint --dev
+```
