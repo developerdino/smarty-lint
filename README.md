@@ -1,4 +1,4 @@
-smarty-lint is a lint implementation for the Smarty templating engine.
+# smarty-lint is a lint implementation for the Smarty templating engine.
 
 smarty-lint was developed out of necessity and with simplicity of use in mind.
 Many of us all have committed broken templates file into our VCS without proper
@@ -8,3 +8,18 @@ to close out your {foreach} statement.
 From here you can easily integrate smarty-lint into your build system, so that
 before committing anything into your source tree you can run template lint
 checks alongside your normal code lints.
+
+## How to install
+In the composer.json in your project, add this section:
+```json
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:developerdino/smarty-lint.git"
+        }
+    ]
+}
+```
+
+Run: `composer require developerdino/smarty-lint`

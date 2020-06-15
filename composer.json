@@ -1,0 +1,12 @@
+{
+    "name": "developerdino/smarty-lint",
+    "description": "A linter for smarty templates",
+    "type": "library",
+    "license": "GPLv2",
+    "require": {
+        "smarty/smarty": "~3.0"
+    },
+    "bin": [
+        "smart-lint"
+    ]
+}

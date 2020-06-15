@@ -52,7 +52,7 @@ $template = realpath($template);
 $show_all_errors = strtolower(array_shift($_SERVER['argv']));
 $show_all_errors = (empty($show_all_errors) || $show_all_errors == 'n') ? false : true;
 
-require_once dirname(__FILE__) . '/smarty/Smarty.class.php';
+require_once __DIR__.'/vendor/autoload.php';
 
 class smarty_lint extends Smarty {
     static public $lint_errors = array();
@@ -67,12 +67,8 @@ class smarty_lint extends Smarty {
         $this->caching = self::CACHING_OFF;
     }
 
-    /**
-     * Attempt to compile the file we want to run a lint check on.
-     *
-     * @param string $template
-     */
-    public function fetch($template) {
+    /** {@inheritdoc} */
+    public function fetch($template = null, $cache_id = NULL, $compile_id = NULL, $parent = NULL) {
         try {
             self::$lint_file = $template;
             parent::fetch($template, null, null, false);
