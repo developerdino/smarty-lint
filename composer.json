@@ -2,7 +2,7 @@
     "name": "developerdino/smarty-lint",
     "description": "A linter for smarty templates",
     "type": "library",
-    "license": "GPLv2",
+    "license": "GPL-2.0-or-later",
     "require": {
         "smarty/smarty": "~3.0"
     },
